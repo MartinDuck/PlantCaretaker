@@ -1,24 +1,53 @@
 #include <Arduino.h>
+#include <WiFiManager.h>     
+#include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
+#include <ESPmDNS.h>
+#include "sensor.h"
+#include "web_handlers.h"
 
-// Definicja pinu do którego podłączona jest wbudowana dioda LED.
-// Dla większości ESP32-C3 jest to GPIO 8.
-const int ledPin = 8; 
+AsyncWebServer server(80);
+
 
 void setup() {
-  // Ustawienie pinu LED jako wyjście
-  pinMode(ledPin, OUTPUT);
+    delay(1000); 
+    Serial.begin(115200);
+
+    setupSensor();
+    analogReadResolution(12); 
+
+    WiFiManager wm;
+    bool res = wm.autoConnect("SmartPlant_Config");
+
+    if(!res) {
+        Serial.println("Błąd połączenia!");
+        ESP.restart();
+    }
+
+    if (WiFi.getMode() & WIFI_AP) {
+        Serial.println("Konfiguracja zakończona sukcesem. Restartuję...");
+        delay(2000);
+        ESP.restart();
+    }
+
+    Serial.println("WiFi OK! Startuję serwer...");
+
+    if (!MDNS.begin("caretaker")) {
+        Serial.println("Błąd konfiguracji mDNS!");
+    } else {
+        Serial.println("mDNS uruchomiony: http://caretaker.local");
+        MDNS.addService("http", "tcp", 80);
+    }
+
+    if(!LittleFS.begin(true)){
+        Serial.println("Blad LittleFS!");
+    }
+
+    setupWebRoutes(&server);
+    server.begin();
+    Serial.println("Serwer uruchomiony.");
 }
 
 void loop() {
-  // 1. Włącz diodę (stan HIGH, czyli wysoki)
-  digitalWrite(ledPin, HIGH); 
-  
-  // Poczekaj 1000 milisekund (1 sekunda)
-  delay(1000); 
-  
-  // 2. Wyłącz diodę (stan LOW, czyli niski)
-  digitalWrite(ledPin, LOW); 
-  
-  // Poczekaj 1000 milisekund (1 sekunda)
-  delay(1000); 
+   
 }
