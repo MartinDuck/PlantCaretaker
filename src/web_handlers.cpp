@@ -4,6 +4,7 @@
 #include "pump.h" 
 
 extern int moistureLevel;
+extern unsigned long lastWateringTimestamp;
 
 void setupWebRoutes(AsyncWebServer* server) {
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -26,6 +27,10 @@ void setupWebRoutes(AsyncWebServer* server) {
     server->on("/pump", HTTP_GET, [](AsyncWebServerRequest *request){
         startPump(3000);
         request->send(200, "text/plain", "Pump activated for 3 seconds.");
+    });
+
+    server->on("/last_watering", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", String(lastWateringTimestamp));
     });
 
 
