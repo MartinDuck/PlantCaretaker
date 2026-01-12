@@ -10,14 +10,49 @@
     <div class="container">
         <h2>Wilgotność</h2>
         <div class="circle" id="moisture">--</div>
-        <button onclick="fetch('/pump')">PODLEJ RĘCZNIE</button>
+        <button id="pumpBtn" onclick="startPump()">PODLEJ RĘCZNIE</button>
     </div>
     <script>
+
         setInterval(() => {
-            fetch('/get_raw')
-                .then(r => r.text())
-                .then(d => { document.getElementById('moisture').innerText = d; });
+            fetch('/get_soil')
+            .then(r => r.text())
+            .then(d => { 
+                const val = parseInt(d) || 0;
+                const element = document.getElementById('moisture');
+                element.innerText = val + "%";
+                element.style.setProperty('--p', val);
+                if(val < 20) element.style.color = "#d32f2f";
+                else element.style.color = "#2e7d32";
+        });
         }, 5000);
+
+        function startPump() {
+        const btn = document.getElementById('pumpBtn');
+        
+        btn.disabled = true;
+        const originalText = btn.innerText;
+        btn.innerText = "PODLEWANIE...";
+
+        fetch('/pump')
+            .then(response => {
+                if(response.ok) {
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerText = originalText;
+                    }, 5000); 
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    console.error("Błąd serwera podczas aktywacji pompy.");
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                console.error("Błąd sieci:", err);
+            });
+    }
     </script>
 </body>
 </html>

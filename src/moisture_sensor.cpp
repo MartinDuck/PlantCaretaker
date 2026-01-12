@@ -1,4 +1,4 @@
-#include "sensor.h"
+#include "moisture_sensor.h"
 
 void setupSensor() {
     pinMode(MOISTURE_SENSOR_POWER, OUTPUT);
