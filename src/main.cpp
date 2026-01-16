@@ -7,6 +7,7 @@
 #include "web_handlers.h"
 #include "pump.h"
 #include "water_level.h"
+#include <Preferences.h>
 
 AsyncWebServer server(8080);
 
@@ -58,21 +59,25 @@ void setup() {
     server.begin();
     Serial.println("Serwer uruchomiony.");
 
-
-
 }
 
 int moistureLevel = 0;
-unsigned long previousMillis = 0;
-const long interval = 10000;
+unsigned long previousMoisture = 0;
+unsigned long previousWaterLevel = 0;
+const long moisture_interval = 1200000; // 20 minutes
+const long water_level_interval = 3600000; // 1 hour
+
+
+int waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
+
 
 void loop() {
    updatePump();
 
     unsigned long currentMillis = millis();
 
-    if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
+    if (currentMillis - previousMoisture >= moisture_interval) {
+        previousMoisture = currentMillis;
 
         if (!isPumpActive && blockUntillMillis < millis()) {
         
@@ -80,12 +85,16 @@ void loop() {
         Serial.print("Poziom wilgotności gleby: ");
         Serial.print(moistureLevel);
         Serial.println("%");
-
-        int distanceCm = getDistnaceCm();
-        Serial.print("Odległość od powierzchni wody: ");
-        Serial.print(distanceCm);
-        Serial.println(" cm");
-
         }
     }
+
+    if (currentMillis - previousWaterLevel >= water_level_interval) {
+        previousWaterLevel = currentMillis;
+        waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
+        Serial.print("Poziom wody w zbiorniku: ");
+        Serial.print(waterLevelPercent);
+        Serial.println("%");
+    }
+
+
 }

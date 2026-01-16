@@ -3,8 +3,10 @@
 
 #include <Arduino.h>
 
+extern int tankEmptyDist;
+extern int tankFullDist;
 void setupWaterLevelSensor();
-int readWaterLevelPercent();
+int readWaterLevelPercent(int minDistanceCm, int maxDistanceCm);
 int getDistnaceCm();
 
 #endif

@@ -4,98 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script> 
     <title>Podlewacz</title>
 </head>
 <body>
     <div class="container" id="moistureContainer">
-        
         <h2>Wilgotność</h2>
         <div class="circle" id="moisture">--</div>
         <button id="pumpBtn" onclick="startPump()">PODLEJ RĘCZNIE</button>
         <div class="lastWatering">
             Ostatnie podlewanie: <span class="lastTime">Ładowanie...</span>
         </div>
-        
     </div>
+
     <div class="water-container" id="waterTank">
+        <button class="settings-btn" onclick="toggleModal()">⚙</button>
         <div id="waterFill" class="water-fill"></div>
         <div class="water-content">
-        <h2>Poziom Wody</h2>
-        <div class="water-value" id="waterVal">--%</div>
-    <script>
+            <h2>Poziom Wody</h2>
+            <div class="water-value" id="waterVal">--%</div>
+        </div>
+    </div>
 
-        setInterval(() => {
-            fetch('/get_soil')
-            .then(r => r.text())
-            .then(d => { 
-                const val = parseInt(d) || 0;
-                const element = document.getElementById('moisture');
-                element.innerText = val + "%";
-                element.style.setProperty('--p', val);
-                if(val < 20) element.style.color = "#d32f2f";
-                else element.style.color = "#2e7d32";
-        });
-        }, 5000);
-
-        function startPump() {
-        const btn = document.getElementById('pumpBtn');
-        
-        btn.disabled = true;
-        const originalText = btn.innerText;
-        btn.innerText = "PODLEWANIE...";
-
-        fetch('/pump')
-            .then(response => {
-                if(response.ok) {
-
-                    updateLastWatering();
-
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerText = originalText;
-                    }, 5000); 
-                } else {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-                    console.error("Błąd serwera podczas aktywacji pompy.");
-                }
-            })
-            .catch(err => {
-                btn.disabled = false;
-                btn.innerText = originalText;
-                console.error("Błąd sieci:", err);
-            });
-    }
-
-    updateLastWatering();
-    setInterval(updateLastWatering, 2000);
-    
-    function updateLastWatering() {
-    fetch('/last_watering')
-        .then(r => r.text())
-        .then(timestamp => {
-            const ts = parseInt(timestamp);
-            const statusElement = document.getElementById('lastTime');
-
-            if (ts === 0) {
-                statusElement.innerText = "Nigdy";
-                return;
-            }
-
-            const now = Math.floor(Date.now() / 1000);
-            const diff = now - ts;
-
-            if (diff < 60) {
-                statusElement.innerText = `Przed chwilą`;
-            } else if (diff < 3600) {
-                const mins = Math.floor(diff / 60);
-                statusElement.innerText = `${mins} min. temu`;
-            } else {
-                const hours = Math.floor(diff / 3600);
-                statusElement.innerText = `${hours} godz. temu`;
-            }
-        });
-    }
-    </script>
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleModal()">&times;</span>
+            <h3>Kalibracja Zbiornika</h3>
+            <p>Dystans w cm:</p>
+            <div class="input-group">
+                <label>Pusty:</label>
+                <input type="number" id="distEmpty" min="0" max="1000">
+            </div>
+            <div class="input-group">
+                <label>Pełny:</label>
+                <input type="number" id="distFull" min="0" max="1000">
+            </div>
+            <button class="save-btn" onclick="saveSettings()">ZAPISZ</button>
+        </div>
+    </div>
 </body>
 </html>

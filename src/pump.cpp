@@ -5,6 +5,7 @@
 unsigned long pumpOffTime = 0;
 bool isPumpActive = false;
 unsigned long blockUntillMillis = 0;
+int milisBlock = 30000;
 
 Preferences prefs;
 unsigned long lastWateringTimestamp = 0; 
@@ -28,7 +29,7 @@ void updatePump() {
     if (isPumpActive && millis() >= pumpOffTime) {
         digitalWrite(PUMP_PIN, LOW);
         isPumpActive = false;
-        blockUntillMillis = millis() + 30000;
+        blockUntillMillis = millis() + milisBlock;
 
         time_t now;
         time(&now);
@@ -38,8 +39,7 @@ void updatePump() {
         prefs.putULong("lastTime", lastWateringTimestamp);
         prefs.end();
 
-        Serial.print("Zapisano czas podlewania do NVS: ");
-        Serial.println(lastWateringTimestamp);
+
 
     }
 }
