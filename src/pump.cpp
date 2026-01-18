@@ -1,6 +1,7 @@
 #include "pump.h"
 #include <Preferences.h>
 #include <time.h>
+#include <water_level.h>
 
 unsigned long pumpOffTime = 0;
 bool isPumpActive = false;
@@ -25,7 +26,7 @@ void startPump(int durationMs) {
     isPumpActive = true;
 }
 
-void updatePump() {
+int updatePump() {
     if (isPumpActive && millis() >= pumpOffTime) {
         digitalWrite(PUMP_PIN, LOW);
         isPumpActive = false;
@@ -39,7 +40,7 @@ void updatePump() {
         prefs.putULong("lastTime", lastWateringTimestamp);
         prefs.end();
 
-
-
+        return 1;
     }
+    return 0;
 }

@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSoil(); 
     updateLastWatering();
     updateWaterLevel();
-    setInterval(updateSoil, 5000);
+    setInterval(updateSoil, 10000);
     setInterval(updateLastWatering, 10000);
-    setInterval(updateWaterLevel, 10000);
+    setInterval(updateWaterLevel, 30000);
 });
 
 function updateSoil() {
@@ -22,7 +22,7 @@ function updateSoil() {
 }
 
 function updateWaterLevel() {
-    fetch('/get_water_level')
+    fetch('/get_water_level', {cache: "no-store"})
         .then(r => r.text())
         .then(d => {
             const val = parseInt(d) || 0;
@@ -60,6 +60,20 @@ function startPump() {
             btn.innerText = originalText;
             alert("Błąd pompy: " + err.message);
         });
+}
+
+function sendAutoMode() {
+    const checkbox = document.getElementById('autoModeCheck');
+    const label = document.querySelector('.auto-label');
+    const isAuto = checkbox.checked;
+    const pumpBtn = document.getElementById('pumpBtn');
+
+    label.style.color = isAuto ? "#2196F3" : "#555";
+    
+    pumpBtn.disabled = isAuto;
+    pumpBtn.style.opacity = isAuto ? "0.5" : "1";
+
+    fetch(`/set_auto?state=${isAuto ? 1 : 0}`);
 }
 
 function updateLastWatering() {
@@ -100,19 +114,36 @@ function toggleModal() {
 }
 
 function saveSettings() {
+    const btn = document.querySelector('.save-btn');
     const empty = document.getElementById('distEmpty').value;
     const full = document.getElementById('distFull').value;
     
+    btn.disabled = true;
+    const originalText = btn.innerText;
+    btn.innerText = "ZAPISYWANIE...";
+
     fetch(`/set_tank?empty=${empty}&full=${full}`)
         .then(r => {
             if(r.ok) {
-                alert("Zapisano ustawienia!");
-                toggleModal();
-                updateWaterLevel();
+                btn.innerText = "ZAPISANO!";
+                btn.style.background = "#2e7d32"; 
+
+                setTimeout(() => {
+                    toggleModal(); 
+                    updateWaterLevel();
+                    
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    btn.style.background = ""; 
+                }, 800);
+            } else {
+                throw new Error("Błąd serwera");
             }
-            else {
-                alert("Błąd zapisu ustawień.");
-            }
+        })
+        .catch(err => {
+            alert("Błąd: " + err.message);
+            btn.disabled = false;
+            btn.innerText = originalText;
         });
 }
 

@@ -11,7 +11,18 @@
     <div class="container" id="moistureContainer">
         <h2>Wilgotność</h2>
         <div class="circle" id="moisture">--</div>
+        
         <button id="pumpBtn" onclick="startPump()">PODLEJ RĘCZNIE</button>
+
+        <div class="switch-container">
+            <label class="switch">
+                <input type="checkbox" id="autoModeCheck" onchange="sendAutoMode()">
+                <span class="slider round"></span>
+            </label>
+            <span class="auto-label">AUTO</span>
+            
+        </div>
+
         <div class="lastWatering">
             Ostatnie podlewanie: <span class="lastTime">Ładowanie...</span>
         </div>

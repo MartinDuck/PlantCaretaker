@@ -10,6 +10,6 @@ extern unsigned long blockUntillMillis;
 
 void setupPump();
 void startPump(int durationMs); 
-void updatePump();             
+int updatePump();             
 
 #endif

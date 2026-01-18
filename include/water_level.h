@@ -7,6 +7,8 @@ extern int tankEmptyDist;
 extern int tankFullDist;
 void setupWaterLevelSensor();
 int readWaterLevelPercent(int minDistanceCm, int maxDistanceCm);
-int getDistnaceCm();
+int getDistanceCm();
+int saveTankSettings(int e, int f);
+void loadTankSettings();    
 
 #endif

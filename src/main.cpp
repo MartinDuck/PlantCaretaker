@@ -8,10 +8,15 @@
 #include "pump.h"
 #include "water_level.h"
 #include <Preferences.h>
+#include "auto_manager.h"
 
 AsyncWebServer server(8080);
 
+int moistureLevel = 0;
+int waterLevelPercent = 0;
+
 void setup() {
+
     delay(1000); 
     Serial.begin(115200);
 
@@ -19,6 +24,7 @@ void setup() {
     setupPump();
     setupWaterLevelSensor();
     analogReadResolution(12); 
+    loadTankSettings();
 
     WiFiManager wm;
 
@@ -26,75 +32,99 @@ void setup() {
     bool res = wm.autoConnect("SmartPlant_Config");
 
     if(!res) {
-        Serial.println("Błąd połączenia!");
+        Serial.println("Błąd połączenia");
         ESP.restart();
     }
     
     if (WiFi.getMode() & WIFI_AP) {
-        Serial.println("Konfiguracja zakończona sukcesem. Restartuję...");
+        Serial.println("Konfiguracja zakończona sukcesem");
         delay(2000);
         ESP.restart();
     }
 
-    configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org", "time.google.com");
+    configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org", "time.google.com"); 
 
     WiFi.mode(WIFI_STA);
     WiFi.setSleep(false);
 
-    Serial.println("WiFi OK! Startuję serwer...");
+    Serial.println("Startuję serwer");
     delay(1000);
 
     if (!MDNS.begin("caretaker")) {
-        Serial.println("Błąd konfiguracji mDNS!");
+        Serial.println("Błąd konfiguracji mDNS");
     } else {
-        Serial.println("mDNS uruchomiony: http://caretaker.local");
+        Serial.println("mDNS uruchomiony: http://caretaker.local:8080");
         MDNS.addService("http", "tcp", 8080);
     }
 
     if(!LittleFS.begin(true)){
-        Serial.println("Blad LittleFS!");
+        Serial.println("Blad LittleFS");
     }
     
     setupWebRoutes(&server);
     server.begin();
-    Serial.println("Serwer uruchomiony.");
+    Serial.println("Serwer uruchomiony");
 
+
+    moistureLevel = readMoisturePercent(4095, 1500);
+    waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
+    Serial.print("Początkowy poziom wilgotności gleby: ");
+    Serial.print(moistureLevel);
+    Serial.println("%");
+    Serial.print("Początkowy poziom wody w zbiorniku: ");
+    Serial.print(waterLevelPercent);
+    Serial.println("%");    
 }
 
-int moistureLevel = 0;
-unsigned long previousMoisture = 0;
-unsigned long previousWaterLevel = 0;
+
+unsigned long previousMoistureMillis = 0;
+unsigned long previousWaterLevelMillis = 0;
 const long moisture_interval = 1200000; // 20 minutes
 const long water_level_interval = 3600000; // 1 hour
 
-
-int waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
-
-
+ 
 void loop() {
-   updatePump();
+
+   if (updatePump()) {
+        waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
+    }
 
     unsigned long currentMillis = millis();
 
-    if (currentMillis - previousMoisture >= moisture_interval) {
-        previousMoisture = currentMillis;
+    if(blockUntillMillis > 0 && currentMillis >= blockUntillMillis) {
+        moistureLevel = readMoisturePercent(4095, 1500);
+        previousMoistureMillis = currentMillis;
+        blockUntillMillis = 0;
 
-        if (!isPumpActive && blockUntillMillis < millis()) {
+    }
+
+    if (currentMillis - previousMoistureMillis >= moisture_interval) {
+        previousMoistureMillis = currentMillis;
+
+        if (!isPumpActive && blockUntillMillis <= currentMillis) {
         
-        moistureLevel = readPercent(4095, 1500); 
+        moistureLevel = readMoisturePercent(4095, 1500); 
         Serial.print("Poziom wilgotności gleby: ");
         Serial.print(moistureLevel);
         Serial.println("%");
         }
     }
 
-    if (currentMillis - previousWaterLevel >= water_level_interval) {
-        previousWaterLevel = currentMillis;
+    if (currentMillis - previousWaterLevelMillis >= water_level_interval && !isPumpActive) {
+        previousWaterLevelMillis = currentMillis;
         waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
         Serial.print("Poziom wody w zbiorniku: ");
         Serial.print(waterLevelPercent);
         Serial.println("%");
     }
+
+    if (isAutoMode)
+    {
+        Serial.println("Auto mode active");
+        //runAutoLogic();
+    }
+    
+    
 
 
 }

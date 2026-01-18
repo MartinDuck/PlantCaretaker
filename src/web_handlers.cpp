@@ -3,6 +3,8 @@
 #include "moisture_sensor.h"
 #include "pump.h" 
 #include "water_level.h"
+#include <Preferences.h>
+#include "auto_manager.h"
 
 extern int moistureLevel;
 extern unsigned long lastWateringTimestamp;
@@ -65,10 +67,30 @@ void setupWebRoutes(AsyncWebServer* server) {
             request->send(400, "text/plain", "Nieprawidłowe wartości");
             return;
         }
+        waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
         request->send(200, "text/plain", "OK");
     } else {
         request->send(400, "text/plain", "Brak parametrow");
     }
+    });
+
+    server->on("/set_auto", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("state")) {
+            String state = request->getParam("state")->value();
+            
+            if (state == "1") {
+                setAutoMode(true);
+            } else {
+                setAutoMode(false);
+            }
+
+            Preferences prefs;
+            prefs.begin("garden", false);
+            prefs.putBool("auto", isAutoMode);
+            prefs.end();
+
+            request->send(200, "text/plain", "OK");
+        }
     });
     
 

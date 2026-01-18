@@ -6,8 +6,8 @@ const int TRIGGER_PIN = 5;
 const int ECHO_PIN = 4;
 
 Preferences tankPrefs;
-int tankEmptyDist = 100;
-int tankFullDist = 10;
+int tankEmptyDist = 20;
+int tankFullDist = 5;
 
 
 void setupWaterLevelSensor() {
@@ -28,7 +28,7 @@ int saveTankSettings(int e, int f) {
     tankPrefs.end();
     return 0;
 }
-int getDistnaceCm() {
+int getDistanceCm() {
     digitalWrite(TRIGGER_PIN, LOW);
     delayMicroseconds(2);
     digitalWrite(TRIGGER_PIN, HIGH);
@@ -40,24 +40,38 @@ int getDistnaceCm() {
     int distanceCm = duration / 58;
 
     if (distanceCm == 0 || distanceCm > 400) {
-        return -1; 
+        return 0; 
     }
 
     return distanceCm;
 }
 
 int readWaterLevelPercent(int emptyDist, int fullDist) {
-    int distanceCm = getDistnaceCm();
-    if (distanceCm == -1) {
+    int distanceCm = getDistanceCm();
+
+    if (distanceCm == -1 || distanceCm > 400) { 
         return -1; 
     }
 
-    if (distanceCm >= emptyDist) {
-        return 100; 
-    } else if (distanceCm <= fullDist) {
-        return 0; 
-    } else {
-        return map(distanceCm, fullDist, emptyDist, 0, 100);
+    if (emptyDist <= fullDist) {
+        return 0;
     }
+
+    if (distanceCm >= emptyDist) {
+        return 0; 
+    } 
+    if (distanceCm <= fullDist) {
+        return 100; 
+    }
+
+    return map(distanceCm, emptyDist, fullDist, 0, 100);
+}
+
+void loadTankSettings() {
+    Preferences prefs;
+    prefs.begin("tank", true); 
+    tankEmptyDist = prefs.getInt("empty", 20); 
+    tankFullDist = prefs.getInt("full", 5);
+    prefs.end();
 }
 

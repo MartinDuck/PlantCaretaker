@@ -9,7 +9,7 @@ const int MOISTURE_SENSOR_POWER = 3;
 void setupSensor();
 
 int readRaw();
-
-int readPercent(int dryValue, int wetValue);
+    
+int readMoisturePercent(int dryValue, int wetValue);
 
 #endif

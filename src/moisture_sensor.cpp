@@ -22,7 +22,7 @@ int readRaw() {
     return rawValue;
 }
 
-int readPercent(int dryValue, int wetValue) {
+int readMoisturePercent(int dryValue, int wetValue) {
     int rawValue = readRaw();
 
     if (rawValue >= dryValue) {
