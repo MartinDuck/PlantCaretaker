@@ -9,27 +9,41 @@
 </head>
 <body>
     <div class="container" id="moistureContainer">
-        <h2>Wilgotność</h2>
-        <div class="circle" id="moisture">--</div>
-        
-        <button id="pumpBtn" onclick="startPump()">PODLEJ RĘCZNIE</button>
+    <h2>Wilgotność</h2>
+    <div class="circle" id="moisture">--</div>
+    
+    <button id="pumpBtn" onclick="startPump()">PODLEJ RĘCZNIE</button>
 
+    <div class="auto-controls-row">
         <div class="switch-container">
             <label class="switch">
                 <input type="checkbox" id="autoModeCheck" onchange="sendAutoMode()">
                 <span class="slider round"></span>
             </label>
-            <span class="auto-label">AUTO</span>
-            
+            <span class="auto-label">AUTO (<span id="currentThresholdDisplay">30</span>%)</span>
         </div>
+        <button class="settings-mini-btn" onclick="toggleMoistureModal()">⚙️</button>
+    </div>
 
-        <div class="lastWatering">
-            Ostatnie podlewanie: <span class="lastTime">Ładowanie...</span>
+    <div id="moistureModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleMoistureModal()">&times;</span>
+            <h3>Ustawienia Nawadniania</h3>
+            <div class="input-group">
+                <label>Docelowa wilgotność (%):</label>
+                <input type="number" id="targetMoistureInput" min="5" max="95">
+            </div>
+            <button class="save-btn" onclick="saveMoistureSettings()">ZAPISZ</button>
         </div>
     </div>
 
+    <div class="lastWatering">
+        Ostatnie podlewanie: <span class="lastTime">--:--</span>
+    </div>
+</div>
+
     <div class="water-container" id="waterTank">
-        <button class="settings-btn" onclick="toggleModal()">⚙</button>
+        <button class="settings-btn" onclick="toggleModal()">⚙️</button>
         <div id="waterFill" class="water-fill"></div>
         <div class="water-content">
             <h2>Poziom Wody</h2>
@@ -45,10 +59,16 @@
             <div class="input-group">
                 <label>Pusty:</label>
                 <input type="number" id="distEmpty" min="0" max="1000">
+                <button class="calib-btn" onclick="calibrate('empty')">🎯</button>
             </div>
             <div class="input-group">
                 <label>Pełny:</label>
                 <input type="number" id="distFull" min="0" max="1000">
+                <button class="calib-btn" onclick="calibrate('full')">🎯</button>
+            </div>
+            <div class="input-group">
+                <label>Minimum wody (%):</label>
+                <input type="number" id="minWaterLevel" min="0" max="50">
             </div>
             <button class="save-btn" onclick="saveSettings()">ZAPISZ</button>
         </div>

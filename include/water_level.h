@@ -9,6 +9,7 @@ void setupWaterLevelSensor();
 int readWaterLevelPercent(int minDistanceCm, int maxDistanceCm);
 int getDistanceCm();
 int saveTankSettings(int e, int f);
-void loadTankSettings();    
+void loadTankSettings();  
+int getWaterLevelPercent();  
 
 #endif

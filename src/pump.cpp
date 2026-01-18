@@ -1,12 +1,15 @@
 #include "pump.h"
 #include <Preferences.h>
 #include <time.h>
-#include <water_level.h>
+#include "water_level.h"
+#include "auto_manager.h"
 
 unsigned long pumpOffTime = 0;
 bool isPumpActive = false;
 unsigned long blockUntillMillis = 0;
 int milisBlock = 30000;
+extern int waterLevelPercent;
+
 
 Preferences prefs;
 unsigned long lastWateringTimestamp = 0; 
@@ -21,6 +24,9 @@ void setupPump() {
 }
 
 void startPump(int durationMs) {
+    if(waterLevelPercent < minWaterLevelPercent) return;
+    if (isPumpActive) return;
+    if (blockUntillMillis > millis()) return;
     digitalWrite(PUMP_PIN, HIGH);
     pumpOffTime = millis() + durationMs;
     isPumpActive = true;

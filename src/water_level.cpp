@@ -28,29 +28,41 @@ int saveTankSettings(int e, int f) {
     tankPrefs.end();
     return 0;
 }
+
 int getDistanceCm() {
-    digitalWrite(TRIGGER_PIN, LOW);
-    delayMicroseconds(2);
-    digitalWrite(TRIGGER_PIN, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(TRIGGER_PIN, LOW);
+    const int NUM_SAMPLES = 5;
+    long totalDistance = 0;
+    int validSamples = 0;
 
-    long duration = pulseIn(ECHO_PIN, HIGH, 30000); 
+    for (int i = 0; i < NUM_SAMPLES; i++) {
+        digitalWrite(TRIGGER_PIN, LOW);
+        delayMicroseconds(2);
+        digitalWrite(TRIGGER_PIN, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(TRIGGER_PIN, LOW);
 
-    int distanceCm = duration / 58;
+        long duration = pulseIn(ECHO_PIN, HIGH, 30000);
+        int distanceCm = duration / 58;
 
-    if (distanceCm == 0 || distanceCm > 400) {
-        return 0; 
+        if (distanceCm > 0 && distanceCm <= 400) {
+            totalDistance += distanceCm;
+            validSamples++;
+        }
+        delay(10);
     }
 
-    return distanceCm;
+    if (validSamples == 0) {
+        return 0;
+    }
+
+    return totalDistance / validSamples;
 }
 
 int readWaterLevelPercent(int emptyDist, int fullDist) {
     int distanceCm = getDistanceCm();
 
     if (distanceCm == -1 || distanceCm > 400) { 
-        return -1; 
+        return 0; 
     }
 
     if (emptyDist <= fullDist) {
@@ -74,4 +86,5 @@ void loadTankSettings() {
     tankFullDist = prefs.getInt("full", 5);
     prefs.end();
 }
+
 

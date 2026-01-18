@@ -109,12 +109,19 @@ button:disabled {
     top: 10px;
     right: 10px;
     background: none;
-    border: none;
+    border: 1px solid #ccc;
     font-size: 1.5rem;
     cursor: pointer;
     z-index: 10;
     color: #666;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
 }
+
 
 .modal {
     display: none; 
@@ -205,6 +212,44 @@ button:disabled {
     color: #555;
     letter-spacing: 1px;
 }
+.auto-input {
+    display: flex;
+    gap: 5px;
+}
+
+.calib-btn {
+    background: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.calib-btn:hover {
+    background: #bdbdbd;
+}
+
+.auto-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+    background: rgba(0,0,0,0.0);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.settings-mini-btn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.3s;
+}
+
 
 
 input:checked + .slider { background-color: #2196F3; }

@@ -25,6 +25,7 @@ void setup() {
     setupWaterLevelSensor();
     analogReadResolution(12); 
     loadTankSettings();
+    initAutoManager();
 
     WiFiManager wm;
 
@@ -79,10 +80,11 @@ void setup() {
 
 unsigned long previousMoistureMillis = 0;
 unsigned long previousWaterLevelMillis = 0;
-const long moisture_interval = 1200000; // 20 minutes
+const long moisture_interval = 120000; // 2 minutes
 const long water_level_interval = 3600000; // 1 hour
 
- 
+
+
 void loop() {
 
    if (updatePump()) {
@@ -120,11 +122,11 @@ void loop() {
 
     if (isAutoMode)
     {
-        Serial.println("Auto mode active");
-        //runAutoLogic();
+        runAutoLogic();
     }
     
     
 
 
 }
+
