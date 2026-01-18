@@ -11,6 +11,7 @@ extern unsigned long lastWateringTimestamp;
 extern int tankEmptyDist;
 extern int tankFullDist;
 extern int waterLevelPercent;
+
 extern int saveTankSettings(int e, int f);
 
 void setupWebRoutes(AsyncWebServer* server) {
@@ -110,11 +111,6 @@ void setupWebRoutes(AsyncWebServer* server) {
             } else {
                 setAutoMode(false);
             }
-
-            Preferences prefs;
-            prefs.begin("garden", false);
-            prefs.putBool("auto", isAutoMode);
-            prefs.end();
 
             request->send(200, "text/plain", "OK");
         }

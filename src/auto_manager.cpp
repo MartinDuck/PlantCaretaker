@@ -28,7 +28,8 @@ void runAutoLogic() {
     int error = autoThreshold - moistureLevel;
 
     if (error >= 5 && moistureLevel > 0) {
-    
+        
+        waterLevelPercent = readWaterLevelPercent(tankEmptyDist, tankFullDist);
         if (waterLevelPercent > minWaterLevelPercent) {
         
             int doseTime = error * K_PROPORTIONAL;
@@ -43,8 +44,7 @@ void runAutoLogic() {
             nextAllowedWatering = now + SOAKING_TIME;
             
         } else {
-            Serial.println("AUTO: ALARM - Brak wody w zbiorniku!");
-
+            Serial.println("AUTO: Brak wody w zbiorniku");
            
         }
     }
